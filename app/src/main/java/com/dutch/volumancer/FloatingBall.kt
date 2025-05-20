@@ -9,7 +9,6 @@ import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
 import android.view.WindowManager
-import android.widget.Toast
 import com.dutch.volumancer.VolumancerApplication.Companion.LOG_TAG
 
 class FloatingBall(private val context: Context) {
@@ -42,24 +41,78 @@ class FloatingBall(private val context: Context) {
         }
         val ball = view!!.findViewById<View>(R.id.ball)
 
+        var initialX = 0
+        var initialY = 0
+        var initialTouchX = 0f
+        var initialTouchY = 0f
+        var isClick = true
+
         ball.setOnTouchListener { v, event ->
             when (event.action) {
                 MotionEvent.ACTION_DOWN -> {
+                    initialX = layoutParams.x
+                    initialY = layoutParams.y
+                    initialTouchX = event.rawX
+                    initialTouchY = event.rawY
+                    isClick = true
+
                     v.animate().scaleX(0.9f).scaleY(0.9f).setDuration(100).start()
                     true
                 }
-                MotionEvent.ACTION_UP -> {
-                    v.animate().scaleX(1f).scaleY(1f).setDuration(100).start()
-                    Toast.makeText(context, "ball clicked", Toast.LENGTH_SHORT).show()
 
-                    val audioManager = context.getSystemService(Context.AUDIO_SERVICE) as AudioManager
-                    audioManager.adjustVolume(AudioManager.ADJUST_SAME, AudioManager.FLAG_SHOW_UI)
+                MotionEvent.ACTION_MOVE -> {
+                    val deltaX = (event.rawX - initialTouchX).toInt()
+                    val deltaY = (event.rawY - initialTouchY).toInt()
 
+                    // If movement is significant, treat as drag, not click
+                    if (isClick && (Math.abs(deltaX) > 10 || Math.abs(deltaY) > 10)) {
+                        isClick = false
+                    }
+
+                    if (!isClick) {
+                        layoutParams.x = initialX + deltaX
+                        layoutParams.y = initialY + deltaY
+                        windowManager.updateViewLayout(view, layoutParams)
+                    }
                     true
                 }
+
+                MotionEvent.ACTION_UP -> {
+                    v.animate().scaleX(1f).scaleY(1f).setDuration(100).start()
+
+                    if (isClick) {
+                        val audioManager =
+                            context.getSystemService(Context.AUDIO_SERVICE) as AudioManager
+                        audioManager.adjustVolume(
+                            AudioManager.ADJUST_SAME,
+                            AudioManager.FLAG_SHOW_UI
+                        )
+                    }
+                    true
+                }
+
                 else -> false
             }
         }
+
+//        ball.setOnTouchListener { v, event ->
+//            when (event.action) {
+//                MotionEvent.ACTION_DOWN -> {
+//                    v.animate().scaleX(0.9f).scaleY(0.9f).setDuration(100).start()
+//                    true
+//                }
+//                MotionEvent.ACTION_UP -> {
+//                    v.animate().scaleX(1f).scaleY(1f).setDuration(100).start()
+//                    Toast.makeText(context, "ball clicked", Toast.LENGTH_SHORT).show()
+//
+//                    val audioManager = context.getSystemService(Context.AUDIO_SERVICE) as AudioManager
+//                    audioManager.adjustVolume(AudioManager.ADJUST_SAME, AudioManager.FLAG_SHOW_UI)
+//
+//                    true
+//                }
+//                else -> false
+//            }
+//        }
 
         try {
             windowManager.addView(view, layoutParams)
