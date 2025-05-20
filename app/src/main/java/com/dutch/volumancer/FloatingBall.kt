@@ -1,16 +1,13 @@
 package com.dutch.volumancer
 
 import android.content.Context
-import android.content.Intent
 import android.graphics.PixelFormat
-import android.net.Uri
-import android.os.Build
-import android.provider.Settings
+import android.media.AudioManager
 import android.util.Log
 import android.view.Gravity
 import android.view.LayoutInflater
+import android.view.MotionEvent
 import android.view.View
-import android.view.Window
 import android.view.WindowManager
 import android.widget.Toast
 import com.dutch.volumancer.VolumancerApplication.Companion.LOG_TAG
@@ -35,16 +32,41 @@ class FloatingBall(private val context: Context) {
         )
 
         layoutParams.gravity = Gravity.TOP or Gravity.START
-        layoutParams.x = 100
-        layoutParams.y = 300
+        layoutParams.x = 10
+        layoutParams.y = 10
 
         view = LayoutInflater.from(context).inflate(R.layout.quick_ball, null)
+        if (view == null) {
+            Log.e(TAG, "Inflated view is null!")
+            return
+        }
         val ball = view!!.findViewById<View>(R.id.ball)
 
-        ball.setOnClickListener{
-            Toast.makeText(context, "ball clicked", Toast.LENGTH_SHORT).show()
+        ball.setOnTouchListener { v, event ->
+            when (event.action) {
+                MotionEvent.ACTION_DOWN -> {
+                    v.animate().scaleX(0.9f).scaleY(0.9f).setDuration(100).start()
+                    true
+                }
+                MotionEvent.ACTION_UP -> {
+                    v.animate().scaleX(1f).scaleY(1f).setDuration(100).start()
+                    Toast.makeText(context, "ball clicked", Toast.LENGTH_SHORT).show()
+
+                    val audioManager = context.getSystemService(Context.AUDIO_SERVICE) as AudioManager
+                    audioManager.adjustVolume(AudioManager.ADJUST_SAME, AudioManager.FLAG_SHOW_UI)
+
+                    true
+                }
+                else -> false
+            }
         }
-        windowManager.addView(view, layoutParams)
+
+        try {
+            windowManager.addView(view, layoutParams)
+            Log.i(TAG, "Quick ball added to window.")
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to add quick ball: ${e.message}", e)
+        }
 
     }
 
@@ -56,9 +78,4 @@ class FloatingBall(private val context: Context) {
         view = null
 
     }
-
-
-
-
-
 }

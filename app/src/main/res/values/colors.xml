@@ -2,4 +2,11 @@
 <resources>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+    <color name="widget_bg_color">#F0F0F3</color> <!-- Light gray -->
+    <color name="widget_button_bg">#FFFFFF</color>
+    <color name="widget_text_color">#333333</color>
+    <color name="widget_icon_tint">#555555</color>
+    <color name="widget_label_bg">#FFFFFF</color>
+    <color name="ripple_color">#22000000</color>
+
 </resources>

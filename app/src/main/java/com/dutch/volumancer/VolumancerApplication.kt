@@ -33,5 +33,7 @@ class VolumancerApplication: Application() {
 
     companion object {
         const val LOG_TAG = "Volumancer"
+        var quickBallEnabled = false
+
     }
 }

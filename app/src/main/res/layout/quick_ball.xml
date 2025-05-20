@@ -1,5 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="80dp"
-    android:layout_height="80dp"
+    android:layout_width="10dp"
+    android:layout_height="10dp"
     android:background="@drawable/quick_ball_bg"
-    android:id="@+id/ball"/>
+    android:layout_gravity="center">
+
+    <ImageView
+        android:id="@+id/ball"
+        android:layout_width="10dp"
+        android:layout_height="10dp"
+        android:layout_gravity="center"
+        android:src="@drawable/ic_volume_ball"
+        android:contentDescription="@string/app_name"
+        android:scaleType="centerInside" />
+</FrameLayout>

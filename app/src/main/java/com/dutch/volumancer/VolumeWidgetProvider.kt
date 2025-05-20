@@ -8,19 +8,20 @@ import android.appwidget.AppWidgetProvider
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
+import android.media.AudioManager
 import android.util.Log
 import android.widget.RemoteViews
 import androidx.core.content.ContextCompat
 import com.dutch.volumancer.AppConstants.Companion.ACTION_QUICk_BALL_TOGGLE
 import com.dutch.volumancer.VolumancerApplication.Companion.LOG_TAG
+import com.dutch.volumancer.VolumancerApplication.Companion.quickBallEnabled
 
 class VolumeWidgetProvider : AppWidgetProvider() {
     val TAG = "$LOG_TAG com.dutch.volumancer.VolumeWidgetProvider"
     lateinit var mediaVolumeHelper: MediaVolumeHelper
-    var quickBallEnabled = false
 
 
-    override fun onReceive(context: Context?, intent: Intent?) {
+    override fun onReceive(context: Context, intent: Intent?) {
         Log.i(TAG, "onReceive(), intent: $intent context: $context")
         mediaVolumeHelper = MediaVolumeHelper(context)
 
@@ -31,15 +32,13 @@ class VolumeWidgetProvider : AppWidgetProvider() {
             ACTION_VOLUME_UP -> mediaVolumeHelper.changeVolume(context, true)
             ACTION_VOLUME_DOWN -> mediaVolumeHelper.changeVolume(context, false)
             ACTION_QUICk_BALL_TOGGLE -> {
+                Log.i(TAG, "quickBallEnabled: $quickBallEnabled")
                 if (quickBallEnabled) {
-
+                    context.stopService(Intent(context, MainService::class.java))
+                    quickBallEnabled = false
                 } else {
-                    VolumancerApplication().onCreate()
-
-//                    val intent = Intent(this, MainService::class.java)
-//                    ContextCompat.startForegroundService(this, intent)
-//
-//        startService(Intent(this, MainService::class.java))
+                    ContextCompat.startForegroundService(context, Intent(context, MainService::class.java))
+                    quickBallEnabled = true
 
                 }
             }
@@ -68,8 +67,6 @@ class VolumeWidgetProvider : AppWidgetProvider() {
             val ids = AppWidgetManager.getInstance(it).getAppWidgetIds(componentName)
             ids.forEach { updateWidget(context, widgetManager, it) }
         }
-
-
     }
 
 

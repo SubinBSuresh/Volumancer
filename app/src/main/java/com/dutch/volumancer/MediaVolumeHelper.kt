@@ -15,7 +15,7 @@ class MediaVolumeHelper(context: Context?) {
         val maximumVolume = audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC)
         var currentVolume = audioManager.getStreamVolume(AudioManager.STREAM_MUSIC)
 
-        currentVolume += if (increase) 1 else -1
+        currentVolume += if (increase) 7 else -7
         currentVolume = currentVolume.coerceIn(0, maximumVolume)
         audioManager.setStreamVolume(AudioManager.STREAM_MUSIC, currentVolume, 0)
 
