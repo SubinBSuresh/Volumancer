@@ -7,6 +7,13 @@ No bloated UI. No unnecessary permissions. Just elegant control at your fingerti
 
 ---
 
+# Why I created this
+You know those phones where the volume buttons just stop working? It’s frustrating, and it happens more often than it should. On top of that, Android’s default quick ball or floating shortcuts barely offer decent volume controls. It’s like that important feature was completely overlooked.
+As an Android developer, I figured: why wait for someone else to fix this? So, I built Volumancer — a simple, focused app that does one thing really well: lets you control your media volume quickly and easily, no fuss.
+At the end of the day, what’s the point of being a developer if you can’t solve your own problems? This app is my way of making Android work the way it should — for me, and for anyone else tired of volume button headaches.
+
+
+
 ## 📦 Features
 
 - 📱 **Home screen widget** to instantly raise or lower media volume.
