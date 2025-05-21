@@ -8,7 +8,7 @@ import com.dutch.volumancer.VolumancerApplication.Companion.LOG_TAG
 class MediaVolumeHelper(context: Context?) {
 
     val TAG = "$LOG_TAG com.dutch.volumancer.MediaVolumeHelper"
-     val audioManager: AudioManager  = (context?.getSystemService(Context.AUDIO_SERVICE) ) as AudioManager;
+     val audioManager: AudioManager  = (context?.getSystemService(Context.AUDIO_SERVICE) ) as AudioManager
 
     fun changeVolume(context: Context?, increase: Boolean) {
         Log.i(TAG, "changeVolume(), increase: $increase")

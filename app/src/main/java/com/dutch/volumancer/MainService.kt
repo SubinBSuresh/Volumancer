@@ -60,7 +60,7 @@ class MainService : Service() {
                 description = "Shows when Volumancer's quick ball is running"
             }
 
-            val manager = getSystemService(Context.NOTIFICATION_SERVICE) as android.app.NotificationManager
+            val manager = getSystemService(NOTIFICATION_SERVICE) as android.app.NotificationManager
             manager.createNotificationChannel(channel)
         }
 
