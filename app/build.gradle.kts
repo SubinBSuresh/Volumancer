@@ -1,6 +1,7 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
+    alias { libs.plugins.kotlin.spotless }
 }
 
 android {
@@ -36,6 +37,15 @@ android {
 
     buildFeatures {
         viewBinding = true
+    }
+    spotless {
+        kotlin {
+            target("**/*.kt")
+//            ktlint("0.50.0")
+            trimTrailingWhitespace()
+            endWithNewline()
+            leadingSpacesToTabs()
+        }
     }
 }
 

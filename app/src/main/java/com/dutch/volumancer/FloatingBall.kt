@@ -15,125 +15,123 @@ import android.view.WindowManager
 import com.dutch.volumancer.VolumancerApplication.Companion.LOG_TAG
 
 class FloatingBall(private val context: Context) {
-    private val TAG = "$LOG_TAG FloatingBall"
+	private val TAG = "$LOG_TAG FloatingBall"
 
-    private val windowManager = context.getSystemService(Context.WINDOW_SERVICE) as WindowManager
-    private var view: View? = null
-    private var layoutParams: WindowManager.LayoutParams? = null
+	private val windowManager = context.getSystemService(Context.WINDOW_SERVICE) as WindowManager
+	private var view: View? = null
+	private var layoutParams: WindowManager.LayoutParams? = null
 
+	// auto hide components
+	private val autoHideDelay: Long = 3000
+	private val handler = Handler(Looper.getMainLooper())
+	private val autoHideRunnable = Runnable {
+		view?.animate()?.alpha(0.3f)?.setDuration(300)?.start()
+	}
 
-    //auto hide components
-    private val autoHideDelay: Long = 3000
-    private val handler = Handler(Looper.getMainLooper())
-    private val autoHideRunnable = Runnable {
-        view?.animate()?.alpha(0.3f)?.setDuration(300)?.start()
-    }
+	@SuppressLint("ClickableViewAccessibility")
+	fun showQuickBall() {
+		if (view != null) return
+		Log.i(TAG, "showQuickBall")
 
+		layoutParams = WindowManager.LayoutParams(
+			WindowManager.LayoutParams.WRAP_CONTENT,
+			WindowManager.LayoutParams.WRAP_CONTENT,
+			WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
+			WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
+			PixelFormat.TRANSLUCENT,
+		).apply {
+			gravity = Gravity.TOP or Gravity.START
+			x = 10
+			y = 10
+		}
 
-    @SuppressLint("ClickableViewAccessibility")
-    fun showQuickBall() {
-        if (view != null) return
-        Log.i(TAG, "showQuickBall")
+		view = LayoutInflater.from(context).inflate(R.layout.quick_ball, null)
+		if (view == null) {
+			Log.e(TAG, "Inflated view is null!")
+			return
+		}
+		val ball = view!!.findViewById<View>(R.id.ball)
 
-        layoutParams = WindowManager.LayoutParams(
-            WindowManager.LayoutParams.WRAP_CONTENT,
-            WindowManager.LayoutParams.WRAP_CONTENT,
-            WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
-            WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
-            PixelFormat.TRANSLUCENT
-        ).apply {
-            gravity = Gravity.TOP or Gravity.START
-            x = 10
-            y = 10
-        }
+		var initialX = 0
+		var initialY = 0
+		var initialTouchX = 0f
+		var initialTouchY = 0f
+		var isClick = true
 
-        view = LayoutInflater.from(context).inflate(R.layout.quick_ball, null)
-        if (view == null) {
-            Log.e(TAG, "Inflated view is null!")
-            return
-        }
-        val ball = view!!.findViewById<View>(R.id.ball)
+		ball.setOnTouchListener { v, event ->
+			resetAutoHideTimer()
+			when (event.action) {
+				MotionEvent.ACTION_DOWN -> {
+					initialX = layoutParams!!.x
+					initialY = layoutParams!!.y
+					initialTouchX = event.rawX
+					initialTouchY = event.rawY
+					isClick = true
+					v.animate().scaleX(0.9f).scaleY(0.9f).setDuration(100).start()
+					true
+				}
 
-        var initialX = 0
-        var initialY = 0
-        var initialTouchX = 0f
-        var initialTouchY = 0f
-        var isClick = true
+				MotionEvent.ACTION_MOVE -> {
+					val deltaX = (event.rawX - initialTouchX).toInt()
+					val deltaY = (event.rawY - initialTouchY).toInt()
 
-        ball.setOnTouchListener { v, event ->
-            resetAutoHideTimer()
-            when (event.action) {
-                MotionEvent.ACTION_DOWN -> {
-                    initialX = layoutParams!!.x
-                    initialY = layoutParams!!.y
-                    initialTouchX = event.rawX
-                    initialTouchY = event.rawY
-                    isClick = true
-                    v.animate().scaleX(0.9f).scaleY(0.9f).setDuration(100).start()
-                    true
-                }
+					// If movement is significant, treat as drag, not click
+					if (isClick && (Math.abs(deltaX) > 10 || Math.abs(deltaY) > 10)) {
+						isClick = false
+					}
 
-                MotionEvent.ACTION_MOVE -> {
-                    val deltaX = (event.rawX - initialTouchX).toInt()
-                    val deltaY = (event.rawY - initialTouchY).toInt()
+					if (!isClick) {
+						layoutParams?.x = initialX + deltaX
+						layoutParams?.y = initialY + deltaY
+						windowManager.updateViewLayout(view, layoutParams)
+					}
+					true
+				}
 
-                    // If movement is significant, treat as drag, not click
-                    if (isClick && (Math.abs(deltaX) > 10 || Math.abs(deltaY) > 10)) {
-                        isClick = false
-                    }
+				MotionEvent.ACTION_UP -> {
+					v.animate().scaleX(1f).scaleY(1f).setDuration(100).start()
 
-                    if (!isClick) {
-                        layoutParams?.x = initialX + deltaX
-                        layoutParams?.y = initialY + deltaY
-                        windowManager.updateViewLayout(view, layoutParams)
-                    }
-                    true
-                }
+					if (isClick) {
+						val audioManager =
+							context.getSystemService(Context.AUDIO_SERVICE) as AudioManager
+						audioManager.adjustVolume(
+							AudioManager.ADJUST_SAME,
+							AudioManager.FLAG_SHOW_UI,
+						)
+					} else {
+						val screenWidth = context.resources.displayMetrics.widthPixels
+						layoutParams?.x =
+							if (layoutParams!!.x + v.width / 2 < screenWidth / 2) 0 else screenWidth - v.width
+						windowManager.updateViewLayout(view, layoutParams)
+					}
+					true
+				}
 
-                MotionEvent.ACTION_UP -> {
-                    v.animate().scaleX(1f).scaleY(1f).setDuration(100).start()
+				else -> false
+			}
+		}
+		try {
+			windowManager.addView(view, layoutParams)
+			Log.i(TAG, "Quick ball added to window.")
+			resetAutoHideTimer()
+		} catch (e: Exception) {
+			Log.e(TAG, "Failed to add quick ball: ${e.message}", e)
+		}
+	}
 
-                    if (isClick) {
-                        val audioManager =
-                            context.getSystemService(Context.AUDIO_SERVICE) as AudioManager
-                        audioManager.adjustVolume(
-                            AudioManager.ADJUST_SAME, AudioManager.FLAG_SHOW_UI
-                        )
-                    } else {
-                        val screenWidth = context.resources.displayMetrics.widthPixels
-                        layoutParams?.x =
-                            if (layoutParams!!.x + v.width / 2 < screenWidth / 2) 0 else screenWidth - v.width
-                        windowManager.updateViewLayout(view, layoutParams)
-                    }
-                    true
-                }
+	private fun resetAutoHideTimer() {
+		Log.i(TAG, "resetAutoHideTimer")
+		handler.removeCallbacks(autoHideRunnable)
+		view?.animate()?.alpha(1f)?.setDuration(200)?.start()
+		handler.postDelayed(autoHideRunnable, autoHideDelay)
+	}
 
-                else -> false
-            }
-        }
-        try {
-            windowManager.addView(view, layoutParams)
-            Log.i(TAG, "Quick ball added to window.")
-            resetAutoHideTimer()
-        } catch (e: Exception) {
-            Log.e(TAG, "Failed to add quick ball: ${e.message}", e)
-        }
-
-    }
-
-    private fun resetAutoHideTimer() {
-        Log.i(TAG, "resetAutoHideTimer")
-        handler.removeCallbacks(autoHideRunnable)
-        view?.animate()?.alpha(1f)?.setDuration(200)?.start()
-        handler.postDelayed(autoHideRunnable, autoHideDelay)
-    }
-
-    fun removeQuickBall() {
-        Log.i(TAG, "removeQuickBall")
-        view?.let {
-            handler.removeCallbacks(autoHideRunnable)
-            windowManager.removeView(it)
-        }
-        view = null
-    }
+	fun removeQuickBall() {
+		Log.i(TAG, "removeQuickBall")
+		view?.let {
+			handler.removeCallbacks(autoHideRunnable)
+			windowManager.removeView(it)
+		}
+		view = null
+	}
 }
