@@ -1,4 +1,4 @@
-package com.dutch.volumancer
+package com.dutch.volumancer.ui.widget
 
 import android.app.PendingIntent
 import android.appwidget.AppWidgetManager
@@ -9,14 +9,14 @@ import android.content.Intent
 import android.util.Log
 import android.widget.RemoteViews
 import androidx.core.content.ContextCompat
-import com.dutch.volumancer.AppConstants.Companion.ACTION_QUICk_BALL_TOGGLE
-import com.dutch.volumancer.AppConstants.Companion.ACTION_VOLUME_DOWN
-import com.dutch.volumancer.AppConstants.Companion.ACTION_VOLUME_UP
-import com.dutch.volumancer.VolumancerApplication.Companion.LOG_TAG
-import com.dutch.volumancer.VolumancerApplication.Companion.quickBallEnabled
+import com.dutch.volumancer.service.MainService
+import com.dutch.volumancer.R
+import com.dutch.volumancer.VolumancerApplication
+import com.dutch.volumancer.core.AppConstants
+import com.dutch.volumancer.core.MediaVolumeHelper
 
 class VolumeWidgetProvider : AppWidgetProvider() {
-	val TAG = "$LOG_TAG com.dutch.volumancer.VolumeWidgetProvider"
+	val TAG = "${VolumancerApplication.Companion.LOG_TAG} com.dutch.volumancer.VolumeWidgetProvider"
 	lateinit var mediaVolumeHelper: MediaVolumeHelper
 
 	override fun onReceive(context: Context, intent: Intent?) {
@@ -26,16 +26,18 @@ class VolumeWidgetProvider : AppWidgetProvider() {
 		super.onReceive(context, intent)
 
 		when (intent?.action) {
-			ACTION_VOLUME_UP -> mediaVolumeHelper.changeVolume(context, true)
-			ACTION_VOLUME_DOWN -> mediaVolumeHelper.changeVolume(context, false)
-			ACTION_QUICk_BALL_TOGGLE -> {
-				Log.i(TAG, "quickBallEnabled: $quickBallEnabled")
-				if (quickBallEnabled) {
+			AppConstants.Companion.ACTION_VOLUME_UP -> mediaVolumeHelper.changeVolume( true)
+			AppConstants.Companion.ACTION_VOLUME_DOWN -> mediaVolumeHelper.changeVolume( false)
+			AppConstants.Companion.ACTION_QUICk_BALL_TOGGLE -> {
+				Log.i(TAG, "quickBallEnabled: ${VolumancerApplication.Companion.quickBallEnabled}")
+				if (VolumancerApplication.Companion.quickBallEnabled) {
 					context.stopService(Intent(context, MainService::class.java))
-					quickBallEnabled = false
+					VolumancerApplication.Companion.quickBallEnabled = false
 				} else {
-					ContextCompat.startForegroundService(context, Intent(context, MainService::class.java))
-					quickBallEnabled = true
+					ContextCompat.startForegroundService(context,
+						Intent(context, MainService::class.java)
+					)
+					VolumancerApplication.Companion.quickBallEnabled = true
 				}
 			}
 		}
@@ -69,19 +71,19 @@ class VolumeWidgetProvider : AppWidgetProvider() {
 
 		val views = RemoteViews(context?.packageName, R.layout.widget_layout)
 
-		val volume = mediaVolumeHelper.getCurrentVolume(context)
+		val volume = mediaVolumeHelper.getCurrentVolume()
 		views.setTextViewText(R.id.tv_widgetMedia, "Volume: $volume")
 
 		val upIntent = Intent(context, VolumeWidgetProvider::class.java).apply {
-			action = ACTION_VOLUME_UP
+			action = AppConstants.Companion.ACTION_VOLUME_UP
 		}
 
 		val downIntent = Intent(context, VolumeWidgetProvider::class.java).apply {
-			action = ACTION_VOLUME_DOWN
+			action = AppConstants.Companion.ACTION_VOLUME_DOWN
 		}
 
 		val quickBall = Intent(context, VolumeWidgetProvider::class.java).apply {
-			action = ACTION_QUICk_BALL_TOGGLE
+			action = AppConstants.Companion.ACTION_QUICk_BALL_TOGGLE
 		}
 
 		views.setOnClickPendingIntent(

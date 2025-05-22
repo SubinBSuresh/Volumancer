@@ -1,7 +1,8 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
-    alias { libs.plugins.kotlin.spotless }
+    alias (libs.plugins.kotlin.spotless)
+    alias(libs.plugins.detekt)
 }
 
 android {
@@ -17,6 +18,8 @@ android {
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
+
+    tasks.named("detekt").configure { enabled = false }
 
     buildTypes {
         release {
@@ -47,6 +50,19 @@ android {
             leadingSpacesToTabs()
         }
     }
+
+    detekt {
+        toolVersion = libs.versions.detektVersion.get()
+        config = files("$rootDir/detekt.yml")
+        buildUponDefaultConfig = true
+        allRules = false
+
+        reports {
+            html.required.set(true)
+            xml.required.set(true)
+            txt.required.set(true)
+        }
+    }
 }
 
 dependencies {
@@ -59,4 +75,6 @@ dependencies {
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
+    testImplementation(libs.mockito)
+    testImplementation(libs.mockito.kotlin)
 }

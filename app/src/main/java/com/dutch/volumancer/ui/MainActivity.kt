@@ -1,4 +1,4 @@
-package com.dutch.volumancer
+package com.dutch.volumancer.ui
 
 import android.content.Intent
 import android.os.Bundle
@@ -9,10 +9,12 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
-import com.dutch.volumancer.VolumancerApplication.Companion.LOG_TAG
+import com.dutch.volumancer.service.MainService
+import com.dutch.volumancer.R
+import com.dutch.volumancer.VolumancerApplication
 
 class MainActivity : AppCompatActivity() {
-	private val TAG = "$LOG_TAG MainActivity"
+	private val TAG = "${VolumancerApplication.Companion.LOG_TAG} MainActivity"
 
 	private lateinit var btnStartQuickBallService: Button
 	private lateinit var btnStopQuickBallService: Button

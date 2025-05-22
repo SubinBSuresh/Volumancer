@@ -1,4 +1,4 @@
-package com.dutch.volumancer
+package com.dutch.volumancer.core
 
 class AppConstants {
 

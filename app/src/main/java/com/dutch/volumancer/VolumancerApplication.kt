@@ -2,6 +2,7 @@ package com.dutch.volumancer
 
 import android.app.Application
 import android.util.Log
+import com.dutch.volumancer.core.ServiceStarter
 
 class VolumancerApplication : Application() {
 	private val TAG = "$LOG_TAG VolumancerApplication"

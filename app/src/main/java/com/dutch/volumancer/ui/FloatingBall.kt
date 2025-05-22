@@ -1,4 +1,4 @@
-package com.dutch.volumancer
+package com.dutch.volumancer.ui
 
 import android.annotation.SuppressLint
 import android.content.Context
@@ -12,10 +12,11 @@ import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
 import android.view.WindowManager
-import com.dutch.volumancer.VolumancerApplication.Companion.LOG_TAG
+import com.dutch.volumancer.R
+import com.dutch.volumancer.VolumancerApplication
 
 class FloatingBall(private val context: Context) {
-	private val TAG = "$LOG_TAG FloatingBall"
+	private val TAG = "${VolumancerApplication.Companion.LOG_TAG} FloatingBall"
 
 	private val windowManager = context.getSystemService(Context.WINDOW_SERVICE) as WindowManager
 	private var view: View? = null

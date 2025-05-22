@@ -1,6 +1,8 @@
-package com.dutch.volumancer
+package com.dutch.volumancer.service
 
 import android.app.Notification
+import android.app.NotificationChannel
+import android.app.NotificationManager
 import android.app.Service
 import android.content.Context
 import android.content.Intent
@@ -9,12 +11,14 @@ import android.os.IBinder
 import android.provider.Settings
 import android.util.Log
 import androidx.core.net.toUri
-import com.dutch.volumancer.VolumancerApplication.Companion.LOG_TAG
+import com.dutch.volumancer.R
+import com.dutch.volumancer.VolumancerApplication
+import com.dutch.volumancer.ui.FloatingBall
 
 class MainService : Service() {
 
 	private lateinit var floatingBall: FloatingBall
-	val TAG = "$LOG_TAG MainService"
+	val TAG = "${VolumancerApplication.Companion.LOG_TAG} MainService"
 	lateinit var notification: Notification
 
 	override fun onBind(intent: Intent?): IBinder? = null
@@ -49,15 +53,15 @@ class MainService : Service() {
 		val channelName = "Volumancer Service"
 
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-			val channel = android.app.NotificationChannel(
+			val channel = NotificationChannel(
 				channelId,
 				channelName,
-				android.app.NotificationManager.IMPORTANCE_LOW,
+				NotificationManager.IMPORTANCE_LOW,
 			).apply {
 				description = "Shows when Volumancer's quick ball is running"
 			}
 
-			val manager = getSystemService(NOTIFICATION_SERVICE) as android.app.NotificationManager
+			val manager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
 			manager.createNotificationChannel(channel)
 		}
 
